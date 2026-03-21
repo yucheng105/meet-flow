@@ -228,6 +228,9 @@ export default function MeetFlow() {
   const [open, setOpen] = useState(false);
   const [viewId, setViewId] = useState("xiao-liang");
 
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleStatus, setGoogleStatus] = useState<"idle" | "connecting" | "connected" | "failed">("idle");
+
   const me = members.find((m) => m.id === "me")!;
   const others = members.filter((m) => m.id !== "me");
   const viewing = members.find((m) => m.id === viewId) ?? others[0];
@@ -266,6 +269,20 @@ export default function MeetFlow() {
     setMembers((prev) => [...prev, newMember]);
     setNewName("");
     setOpen(false);
+  }
+
+  function toggleGoogleConnect() {
+    if (googleConnected) {
+      setGoogleConnected(false);
+      setGoogleStatus("idle");
+      return;
+    }
+
+    setGoogleStatus("connecting");
+    setTimeout(() => {
+      setGoogleConnected(true);
+      setGoogleStatus("connected");
+    }, 900);
   }
 
   return (
@@ -375,6 +392,33 @@ export default function MeetFlow() {
                 點擊或拖曳選取矩形範圍來批次切換空閒時段
               </p>
             </div>
+
+            <div className="mb-4 border rounded-lg p-4 bg-background/50">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">連接 Google 行事曆 (介面示範)</p>
+                  <p className="text-sm text-muted-foreground">
+                    {googleStatus === "connecting"
+                      ? "正在連線至 Google 行事曆..."
+                      : googleConnected
+                      ? "已連線：我的行程已展示在時間表。"
+                      : "尚未連線。點擊按鈕即可模擬連線。"}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={toggleGoogleConnect}
+                  disabled={googleStatus === "connecting"}
+                >
+                  {googleStatus === "connecting"
+                    ? "連線中..."
+                    : googleConnected
+                    ? "斷開 Google 行事曆"
+                    : "連接 Google 行事曆"}
+                </Button>
+              </div>
+            </div>
+
             <Card>
               <CardContent className="pt-6">
                 <Legend
